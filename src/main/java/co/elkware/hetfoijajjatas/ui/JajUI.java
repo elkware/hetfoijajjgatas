@@ -5,6 +5,7 @@ import co.elkware.hetfoijajjatas.view.JajViewDisplay;
 import co.elkware.hetfoijajjatas.view.WailView;
 import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.annotations.Theme;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
@@ -23,14 +24,15 @@ public class JajUI extends UI {
         layout.setWidth(100, Unit.PERCENTAGE);
         setContent(layout);
         getNavigator().navigateTo(WailView.NAME);
+        Page.getCurrent().setTitle("Hétfői jajgatás");
     }
 
     private Component header() {
         Label headerLabel = new Label("Jaj de jó lenne ha nem lenne ez a hétfő");
         headerLabel.addStyleName(MaterialTheme.LABEL_HUGE);
         MenuBar menuBar = new MenuBar();
-        menuBar.addItem("Jajgatasok", (MenuBar.Command) menuItem ->  getNavigator().navigateTo(WailView.NAME));
-        menuBar.addItem("Jajjantok egyet en is!", (MenuBar.Command) menuItem -> { getNavigator().navigateTo(AddWailView.NAME); });
+        menuBar.addItem("Jajgatások", (MenuBar.Command) menuItem ->  getNavigator().navigateTo(WailView.NAME));
+        menuBar.addItem("Jajjantok én is egyet!", (MenuBar.Command) menuItem -> { getNavigator().navigateTo(AddWailView.NAME); });
         menuBar.addStyleName(MaterialTheme.MENUBAR_PRIMARY);
         menuBar.setWidth(100, Unit.PERCENTAGE);
         VerticalLayout layout = new VerticalLayout(headerLabel, menuBar);

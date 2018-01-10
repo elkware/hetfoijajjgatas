@@ -8,5 +8,6 @@ CREATE TABLE wail (
   content TEXT NOT NULL,
   link VARCHAR(1024) DEFAULT NULL,
   user_id VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT now(),
   FOREIGN KEY (user_id) REFERENCES user(username)
 );

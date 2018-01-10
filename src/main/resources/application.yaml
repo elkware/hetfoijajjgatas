@@ -1,8 +1,3 @@
-flyway:
-  url: jdbc:h2:file:./hetfoijajjgatas
-  user: sa
-  password:
-
 spring:
   datasource:
     driver-class-name: org.h2.Driver
@@ -12,3 +7,6 @@ spring:
     initialize: false
   jooq:
     sql-dialect: h2
+vaadin:
+  servlet:
+    production-mode: true

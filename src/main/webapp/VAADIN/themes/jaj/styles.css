@@ -16735,3 +16735,7 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 .jaj .left .v-button-wrap {
 	text-align: left;
 }
+
+.jaj .alternate-panel-color {
+	background-color: #e9eeff;
+}

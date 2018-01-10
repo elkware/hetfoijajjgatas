@@ -1,0 +1,14 @@
+flyway:
+  url: jdbc:h2:file:./hetfoijajjgatas
+  user: sa
+  password:
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    url: jdbc:h2:file:./hetfoijajjgatas
+    initialize: false
+  jooq:
+    sql-dialect: h2

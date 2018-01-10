@@ -1,0 +1,9 @@
+.idea
+*.iml
+target
+docker-config.yaml
+Dockerfile
+hetfoijajjgatas.mv.db
+hetfoijajjgatas.trace.db
+k8s.yaml
+

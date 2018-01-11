@@ -5,41 +5,23 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
 
 import java.io.ByteArrayInputStream;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
 public final class Utils {
 
-    private static final String FB_JS = "<div id=\"fb-root\"></div>\n" +
-            "<script>(function(d, s, id) {\n" +
-            "  var js, fjs = d.getElementsByTagName(s)[0];\n" +
-            "  if (d.getElementById(id)) return;\n" +
-            "  js = d.createElement(s); js.id = id;\n" +
-            "  js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.11';\n" +
-            "  fjs.parentNode.insertBefore(js, fjs);\n" +
-            "}(document, 'script', 'facebook-jssdk'));</script>";
+    public static final int PAGE_SIZE = 10;
 
     private Utils() {}
 
-    public static Component getFBShareButton(String linkToShare) {
-        final String encodedLink;
+    public static Component getFBShareButton() {
         try {
-            encodedLink = URLEncoder.encode(linkToShare, "UTF-8");
-            final String fbShareStuff = "<div class=\"fb-share-button\" data-href=\""+ linkToShare + "\" data-layout=\"button_count\" data-size=\"small\" data-mobile-iframe=\"true\"><a class=\"fb-xfbml-parse-ignore\" target=\"_blank\" href=\"https://www.facebook.com/sharer/sharer.php?u=" + encodedLink + "&amp;src=sdkpreparse\">Share</a></div>";
+            final String fbShareStuff = "<div id=\"share-buttons\"><a href=\"https://www.facebook.com/sharer/sharer.php?u=&t=\" title=\"Megosztom a fejszbukkon!\" target=\"_blank\" onclick=\"window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(document.URL) + '&t=' + encodeURIComponent(document.URL)); return false;\">" +
+                    "<img src=\"/VAADIN/themes/jaj/facebook.png\" alt=\"Megosztom a fejszbukkon!\" />" +
+                    "</a></div>";
             return new CustomLayout(new ByteArrayInputStream(fbShareStuff.getBytes()));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Component fbJS() {
-        try {
-            Component c = new CustomLayout(new ByteArrayInputStream(FB_JS.getBytes()));
-            c.addStyleName("hide");
-            return c;
-        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -53,5 +35,8 @@ public final class Utils {
         return (Set<Integer>) VaadinSession.getCurrent().getAttribute("thumb_set");
     }
 
+    public static void addThumb(Integer id) {
+        thumbSet().add(id);
+    }
 
 }

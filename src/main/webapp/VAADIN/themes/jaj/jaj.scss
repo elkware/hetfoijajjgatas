@@ -60,4 +60,20 @@ $mat-background-color: #fafafa; // #fafafa for a light and #303030 for a dark th
     height: 0;
   }
 
+  #share-buttons {
+    float: right;
+  }
+
+  #share-buttons img {
+    width: 35px;
+    padding: 5px;
+    border: 0;
+    box-shadow: black;
+    display: inline;
+  }
+
+  .reset-txt-transform {
+    text-transform: none;
+  }
+
 }

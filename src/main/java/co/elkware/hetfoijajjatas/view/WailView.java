@@ -3,6 +3,7 @@ package co.elkware.hetfoijajjatas.view;
 import co.elkware.hetfoijajjatas.service.WailService;
 import co.elkware.hetfoijajjatas.util.Utils;
 import com.github.appreciated.material.MaterialTheme;
+import com.sun.corba.se.impl.logging.UtilSystemException;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -37,11 +38,6 @@ public class WailView extends CustomComponent implements View {
     private void init() {
         wailLayout = new VerticalLayout();
 
-        Component fbShareBtn = new CssLayout(Utils.getFBShareButton(Page.getCurrent().getUriFragment()));
-
-        wailLayout.addComponent(fbShareBtn);
-        wailLayout.setComponentAlignment(fbShareBtn, Alignment.MIDDLE_RIGHT);
-
         Button nextBtn = new Button(VaadinIcons.ARROW_CIRCLE_RIGHT);
         nextBtn.addStyleNames(MaterialTheme.BUTTON_ROUND);
         nextBtn.addClickListener(cl -> turnPage(1));
@@ -53,7 +49,7 @@ public class WailView extends CustomComponent implements View {
         btnLayout.setSizeUndefined();
         wailLayout.addComponent(btnLayout);
         wailLayout.setComponentAlignment(btnLayout, Alignment.MIDDLE_CENTER);
-        populatePanel(currentPage * WailService.PAGE_SIZE);
+        populatePanel(currentPage * Utils.PAGE_SIZE);
         setCompositionRoot(wailLayout);
     }
 
@@ -72,16 +68,16 @@ public class WailView extends CustomComponent implements View {
             }
         });
         componentsToRemove.forEach(p -> wailLayout.removeComponent(p));
-        populatePanel(currentPage * WailService.PAGE_SIZE);
+        populatePanel(currentPage * Utils.PAGE_SIZE);
     }
 
     private int numberOfPages() {
-        return (wailService.getWailCount() - 1) / WailService.PAGE_SIZE;
+        return (wailService.count() - 1) / Utils.PAGE_SIZE;
     }
 
     private void populatePanel(int offset) {
         final boolean[] alterBackground = {false};
-        wailService.getWails(offset).forEach(wail -> {
+        wailService.list(offset).forEach(wail -> {
                 VerticalLayout contentLayout = new VerticalLayout();
 
                 Label wailer = new Label(wail.getUserId());
@@ -111,7 +107,7 @@ public class WailView extends CustomComponent implements View {
                     thumbsUpBtn.addClickListener(cl -> {
                         int thumbsUp = wailService.thumbUp(wail.getId());
                         thumbsUpBtn.setCaption(Integer.toString(thumbsUp));
-                        Utils.thumbSet().add(wail.getId());
+                        Utils.addThumb(wail.getId());
                         thumbsUpBtn.setEnabled(false);
                         thumbsDownBtn.setEnabled(false);
                     });
@@ -119,7 +115,7 @@ public class WailView extends CustomComponent implements View {
                     thumbsDownBtn.addClickListener(cl -> {
                         int thumbsDown = wailService.thumbDown(wail.getId());
                         thumbsDownBtn.setCaption(Integer.toString(thumbsDown));
-                        Utils.thumbSet().add(wail.getId());
+                        Utils.addThumb(wail.getId());
                         thumbsUpBtn.setEnabled(false);
                         thumbsDownBtn.setEnabled(false);
                     });
@@ -128,19 +124,23 @@ public class WailView extends CustomComponent implements View {
                 Label date = new Label("Jajgatás #" + wail.getId().toString() + " @ " + wail.getCreatedAt().toString());
                 date.addStyleNames(MaterialTheme.LABEL_TINY, MaterialTheme.LABEL_BORDERLESS);
 
-                HorizontalLayout ratingAndDateLayout = new HorizontalLayout();
-                ratingAndDateLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-                ratingAndDateLayout.addComponents(thumbsUpBtn, thumbsDownBtn);
+                HorizontalLayout ratingLayout = new HorizontalLayout();
+                ratingLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+                ratingLayout.addComponents(thumbsUpBtn, thumbsDownBtn);
 
-                contentLayout.addComponent(ratingAndDateLayout);
-                contentLayout.setComponentAlignment(ratingAndDateLayout, Alignment.MIDDLE_RIGHT);
-                contentLayout.addComponent(date);
-                contentLayout.setComponentAlignment(date, Alignment.MIDDLE_RIGHT);
+                contentLayout.addComponent(ratingLayout);
+                contentLayout.setComponentAlignment(ratingLayout, Alignment.MIDDLE_RIGHT);
+
+                HorizontalLayout commentAndDateLayout = new HorizontalLayout();
+                commentAndDateLayout.setWidth(100, Unit.PERCENTAGE);
+                Link viewCommentsBtn = new Link("Megnezem a hozzaszolasokat!", new ExternalResource("/#!" + SingleWailView.NAME + "/w="+wail.getId()));
+                viewCommentsBtn.addStyleNames(MaterialTheme.LINK_SMALL);
+                commentAndDateLayout.addComponents(viewCommentsBtn, date);
+                commentAndDateLayout.setComponentAlignment(viewCommentsBtn, Alignment.MIDDLE_LEFT);
+                commentAndDateLayout.setComponentAlignment(date, Alignment.MIDDLE_RIGHT);
+                contentLayout.addComponent(commentAndDateLayout);
 
                 Panel p = new Panel();
-                p.addClickListener(cl -> {
-                   UI.getCurrent().getNavigator().navigateTo(SingleWailView.NAME + "/?w=" + wail.getId());
-                });
                 p.setContent(contentLayout);
                 if (alterBackground[0]) {
                     p.addStyleName("alternate-panel-color");
@@ -151,9 +151,4 @@ public class WailView extends CustomComponent implements View {
         );
     }
 
-    @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
-        String address= Page.getCurrent().getWebBrowser().getAddress();
-        System.out.println(event);
-    }
 }

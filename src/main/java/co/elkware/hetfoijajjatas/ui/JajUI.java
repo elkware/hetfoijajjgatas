@@ -8,11 +8,13 @@ import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.Cookie;
 import java.util.Arrays;
 
 @Theme("jaj")
@@ -24,18 +26,18 @@ public class JajUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        CssLayout layout = new CssLayout(Utils.fbJS(), new VerticalLayout(header(), jajViewDisplay));
+        String url = vaadinRequest.getParameterMap().get("v-loc")[0];
+
+        Page.getCurrent().setTitle("Hétfői jajgatás");
+        CssLayout layout = new CssLayout(new VerticalLayout(header(), jajViewDisplay));
         layout.setWidth(100, Unit.PERCENTAGE);
         setContent(layout);
-        String url = vaadinRequest.getParameterMap().get("v-loc")[0];
         String viewName = WailView.NAME;
         try {
             viewName = url.substring(url.indexOf("#!"));
             viewName = viewName.substring(2);
         } catch (Exception ignored) { }
-        System.out.println(viewName);
         getNavigator().navigateTo(viewName);
-        Page.getCurrent().setTitle("Hétfői jajgatás");
     }
 
     private Component header() {
@@ -43,12 +45,12 @@ public class JajUI extends UI {
         headerLabel.addStyleName(MaterialTheme.LABEL_HUGE);
         MenuBar menuBar = new MenuBar();
         menuBar.addItem("Jajgatások", (MenuBar.Command) menuItem ->  getNavigator().navigateTo(WailView.NAME));
-        menuBar.addItem("Jajjantok én is egyet!", (MenuBar.Command) menuItem -> { getNavigator().navigateTo(AddWailView.NAME); });
+        menuBar.addItem("Jajjantok én is egyet!", (MenuBar.Command) menuItem -> getNavigator().navigateTo(AddWailView.NAME));
         menuBar.addStyleName(MaterialTheme.MENUBAR_PRIMARY);
         menuBar.setWidth(100, Unit.PERCENTAGE);
-
-        VerticalLayout layout = new VerticalLayout(headerLabel, menuBar/*, fbShareBtn*/);
-        //layout.setComponentAlignment(fbShareBtn, Alignment.MIDDLE_RIGHT);
+        Component fbShareBtn = Utils.getFBShareButton();
+        VerticalLayout layout = new VerticalLayout(headerLabel, menuBar, fbShareBtn);
+        layout.setComponentAlignment(fbShareBtn, Alignment.MIDDLE_RIGHT);
         return layout;
     }
 }

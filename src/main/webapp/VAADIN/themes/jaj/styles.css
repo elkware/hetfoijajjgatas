@@ -16744,3 +16744,19 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 	display: none;
 	height: 0;
 }
+
+.jaj #share-buttons {
+	float: right;
+}
+
+.jaj #share-buttons img {
+	width: 35px;
+	padding: 5px;
+	border: 0;
+	box-shadow: black;
+	display: inline;
+}
+
+.jaj .reset-txt-transform {
+	text-transform: none;
+}

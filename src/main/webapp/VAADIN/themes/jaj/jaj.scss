@@ -55,4 +55,9 @@ $mat-background-color: #fafafa; // #fafafa for a light and #303030 for a dark th
     background-color: #e9eeff;
   }
 
+  .hide {
+    display: none;
+    height: 0;
+  }
+
 }

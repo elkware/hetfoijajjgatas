@@ -23,13 +23,13 @@ public class WailService {
 
     public List<WailRecord> getWails(int offset) {
         return dslContext
-                .select(Wail.WAIL.ID, Wail.WAIL.CONTENT, Wail.WAIL.LINK, Wail.WAIL.USER_ID, Wail.WAIL.CREATED_AT)
+                .select(Wail.WAIL.ID, Wail.WAIL.CONTENT, Wail.WAIL.LINK, Wail.WAIL.USER_ID, Wail.WAIL.CREATED_AT, Wail.WAIL.THUMBS_UP, Wail.WAIL.THUMBS_DOWN)
                 .from(Wail.WAIL)
                 .orderBy(Wail.WAIL.CREATED_AT.desc())
                 .limit(PAGE_SIZE)
                 .offset(offset)
                 .stream()
-                .map(res -> new WailRecord(res.value1(), res.value2(), res.value3(), res.value4(), res.value5()))
+                .map(res -> new WailRecord(res.value1(), res.value2(), res.value3(), res.value4(), res.value5(), res.value6(), res.value7()))
                 .collect(Collectors.toList());
     }
 
@@ -46,6 +46,18 @@ public class WailService {
                 .insertInto(Wail.WAIL, Wail.WAIL.CONTENT, Wail.WAIL.LINK, Wail.WAIL.CREATED_AT, Wail.WAIL.USER_ID)
                 .values(content, url, new Timestamp(new Date().getTime()), username)
                 .execute() != 0;
+    }
+
+    public int thumbUp(Integer id) {
+        int thumbs = dslContext.select(Wail.WAIL.THUMBS_UP).from(Wail.WAIL).where(Wail.WAIL.ID.eq(id)).fetch().get(0).value1() + 1;
+        dslContext.update(Wail.WAIL).set(Wail.WAIL.THUMBS_UP, thumbs).where(Wail.WAIL.ID.eq(id)).execute();
+        return thumbs;
+    }
+
+    public int thumbDown(Integer id) {
+        int thumbs = dslContext.select(Wail.WAIL.THUMBS_DOWN).from(Wail.WAIL).where(Wail.WAIL.ID.eq(id)).fetch().get(0).value1() - 1;
+        dslContext.update(Wail.WAIL).set(Wail.WAIL.THUMBS_DOWN, thumbs).where(Wail.WAIL.ID.eq(id)).execute();
+        return thumbs;
     }
 
     public int getWailCount() {

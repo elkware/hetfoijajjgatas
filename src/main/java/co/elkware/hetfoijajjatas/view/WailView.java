@@ -1,10 +1,15 @@
 package co.elkware.hetfoijajjatas.view;
 
 import co.elkware.hetfoijajjatas.service.WailService;
+import co.elkware.hetfoijajjatas.util.Utils;
 import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,21 +20,28 @@ import java.util.List;
 
 @SpringView(name = WailView.NAME)
 public class WailView extends CustomComponent implements View {
-    public static final String NAME = "wails";
+    public static final String NAME = "";
 
     private VerticalLayout wailLayout;
 
-    @Autowired
-    private WailService wailService;
+    private final WailService wailService;
 
     private int currentPage = 0;
 
-    public WailView() {
+    @Autowired
+    public WailView(WailService wailService) {
+        this.wailService = wailService;
     }
 
     @PostConstruct
     private void init() {
         wailLayout = new VerticalLayout();
+
+        Component fbShareBtn = new CssLayout(Utils.getFBShareButton(Page.getCurrent().getUriFragment()));
+
+        wailLayout.addComponent(fbShareBtn);
+        wailLayout.setComponentAlignment(fbShareBtn, Alignment.MIDDLE_RIGHT);
+
         Button nextBtn = new Button(VaadinIcons.ARROW_CIRCLE_RIGHT);
         nextBtn.addStyleNames(MaterialTheme.BUTTON_ROUND);
         nextBtn.addClickListener(cl -> turnPage(1));
@@ -64,7 +76,7 @@ public class WailView extends CustomComponent implements View {
     }
 
     private int numberOfPages() {
-        return wailService.getWailCount() / WailService.PAGE_SIZE;
+        return (wailService.getWailCount() - 1) / WailService.PAGE_SIZE;
     }
 
     private void populatePanel(int offset) {
@@ -86,12 +98,49 @@ public class WailView extends CustomComponent implements View {
                     contentLayout.addComponent(link);
                 }
 
+                Button thumbsUpBtn = new Button(wail.getThumbsUp().toString(), VaadinIcons.THUMBS_UP);
+                thumbsUpBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_TINY);
+
+                Button thumbsDownBtn = new Button(wail.getThumbsDown().toString(), VaadinIcons.THUMBS_DOWN);
+                thumbsDownBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_DANGER, MaterialTheme.BUTTON_TINY);
+
+                if (Utils.thumbSet().contains(wail.getId())) {
+                    thumbsUpBtn.setEnabled(false);
+                    thumbsDownBtn.setEnabled(false);
+                } else {
+                    thumbsUpBtn.addClickListener(cl -> {
+                        int thumbsUp = wailService.thumbUp(wail.getId());
+                        thumbsUpBtn.setCaption(Integer.toString(thumbsUp));
+                        Utils.thumbSet().add(wail.getId());
+                        thumbsUpBtn.setEnabled(false);
+                        thumbsDownBtn.setEnabled(false);
+                    });
+
+                    thumbsDownBtn.addClickListener(cl -> {
+                        int thumbsDown = wailService.thumbDown(wail.getId());
+                        thumbsDownBtn.setCaption(Integer.toString(thumbsDown));
+                        Utils.thumbSet().add(wail.getId());
+                        thumbsUpBtn.setEnabled(false);
+                        thumbsDownBtn.setEnabled(false);
+                    });
+                }
+
                 Label date = new Label("Jajgatás #" + wail.getId().toString() + " @ " + wail.getCreatedAt().toString());
                 date.addStyleNames(MaterialTheme.LABEL_TINY, MaterialTheme.LABEL_BORDERLESS);
+
+                HorizontalLayout ratingAndDateLayout = new HorizontalLayout();
+                ratingAndDateLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+                ratingAndDateLayout.addComponents(thumbsUpBtn, thumbsDownBtn);
+
+                contentLayout.addComponent(ratingAndDateLayout);
+                contentLayout.setComponentAlignment(ratingAndDateLayout, Alignment.MIDDLE_RIGHT);
                 contentLayout.addComponent(date);
                 contentLayout.setComponentAlignment(date, Alignment.MIDDLE_RIGHT);
 
                 Panel p = new Panel();
+                p.addClickListener(cl -> {
+                   UI.getCurrent().getNavigator().navigateTo(SingleWailView.NAME + "/?w=" + wail.getId());
+                });
                 p.setContent(contentLayout);
                 if (alterBackground[0]) {
                     p.addStyleName("alternate-panel-color");
@@ -100,5 +149,11 @@ public class WailView extends CustomComponent implements View {
                 wailLayout.addComponent(p);
             }
         );
+    }
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+        String address= Page.getCurrent().getWebBrowser().getAddress();
+        System.out.println(event);
     }
 }

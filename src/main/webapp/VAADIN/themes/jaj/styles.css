@@ -16739,3 +16739,8 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 .jaj .alternate-panel-color {
 	background-color: #e9eeff;
 }
+
+.jaj .hide {
+	display: none;
+	height: 0;
+}

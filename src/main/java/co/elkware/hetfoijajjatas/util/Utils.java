@@ -1,12 +1,20 @@
 package co.elkware.hetfoijajjatas.util;
 
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomLayout;
+import com.vaadin.ui.UI;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class Utils {
 
@@ -26,17 +34,26 @@ public final class Utils {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Set<Integer> thumbSet() {
-        Object thumbUpSet = VaadinSession.getCurrent().getAttribute("thumb_set");
-        if (thumbUpSet == null) {
-            VaadinSession.getCurrent().setAttribute("thumb_set", new HashSet<Integer>());
-        }
-        return (Set<Integer>) VaadinSession.getCurrent().getAttribute("thumb_set");
-    }
+    public static String getBrowserFingerprint() {
+        WebBrowser browser = Page.getCurrent().getWebBrowser();
+        int scrHeight = browser.getScreenHeight();
+        int scrWidth = browser.getScreenWidth();
+        String ip = browser.getAddress();
+        String timezone = browser.getTimeZoneId();
+        String userAgent = browser.getBrowserApplication();
 
-    public static void addThumb(Integer id) {
-        thumbSet().add(id);
+        String rawFingerprint = "h=" + scrHeight +
+                "&w=" + scrWidth +
+                "&ip=" + ip +
+                "&tz=" + timezone +
+                "&ua=" + userAgent;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawFingerprint.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

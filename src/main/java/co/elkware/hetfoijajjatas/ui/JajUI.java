@@ -1,5 +1,6 @@
 package co.elkware.hetfoijajjatas.ui;
 
+import co.elkware.hetfoijajjatas.service.WailThumbService;
 import co.elkware.hetfoijajjatas.util.Utils;
 import co.elkware.hetfoijajjatas.view.AddWailView;
 import co.elkware.hetfoijajjatas.view.JajViewDisplay;
@@ -24,8 +25,12 @@ public class JajUI extends UI {
     @Autowired
     private JajViewDisplay jajViewDisplay;
 
+    @Autowired
+    private WailThumbService wailThumbService;
+
     @Override
     protected void init(VaadinRequest vaadinRequest) {
+        wailThumbService.insertFingerprintIfNotExists(Utils.getBrowserFingerprint());
         String url = vaadinRequest.getParameterMap().get("v-loc")[0];
 
         Page.getCurrent().setTitle("Hétfői jajgatás");

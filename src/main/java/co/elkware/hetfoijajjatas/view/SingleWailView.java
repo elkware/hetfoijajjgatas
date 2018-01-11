@@ -4,6 +4,7 @@ import co.elkware.hetfoijajjatas.db.generated.tables.records.CommentRecord;
 import co.elkware.hetfoijajjatas.db.generated.tables.records.WailRecord;
 import co.elkware.hetfoijajjatas.service.CommentService;
 import co.elkware.hetfoijajjatas.service.WailService;
+import co.elkware.hetfoijajjatas.service.WailThumbService;
 import co.elkware.hetfoijajjatas.util.Utils;
 import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.icons.VaadinIcons;
@@ -32,6 +33,8 @@ public class SingleWailView extends CustomComponent implements View {
 
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private WailThumbService wailThumbService;
 
     int currentPage = 0;
 
@@ -89,14 +92,14 @@ public class SingleWailView extends CustomComponent implements View {
         Button thumbsDownBtn = new Button(wail.getThumbsDown().toString(), VaadinIcons.THUMBS_DOWN);
         thumbsDownBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_DANGER, MaterialTheme.BUTTON_TINY);
 
-        if (Utils.thumbSet().contains(wail.getId())) {
+        if (wailThumbService.hasThumbed(Utils.getBrowserFingerprint(), wail.getId())) {
             thumbsUpBtn.setEnabled(false);
             thumbsDownBtn.setEnabled(false);
         } else {
             thumbsUpBtn.addClickListener(cl -> {
                 int thumbsUp = wailService.thumbUp(wail.getId());
                 thumbsUpBtn.setCaption(Integer.toString(thumbsUp));
-                Utils.addThumb(wail.getId());
+                wailThumbService.addThumb(Utils.getBrowserFingerprint(), wail.getId());
                 thumbsUpBtn.setEnabled(false);
                 thumbsDownBtn.setEnabled(false);
             });
@@ -104,7 +107,7 @@ public class SingleWailView extends CustomComponent implements View {
             thumbsDownBtn.addClickListener(cl -> {
                 int thumbsDown = wailService.thumbDown(wail.getId());
                 thumbsDownBtn.setCaption(Integer.toString(thumbsDown));
-                Utils.addThumb(wail.getId());
+                wailThumbService.addThumb(Utils.getBrowserFingerprint(), wail.getId());
                 thumbsUpBtn.setEnabled(false);
                 thumbsDownBtn.setEnabled(false);
             });

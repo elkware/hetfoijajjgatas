@@ -1,16 +1,12 @@
 package co.elkware.hetfoijajjatas.view;
 
 import co.elkware.hetfoijajjatas.service.WailService;
+import co.elkware.hetfoijajjatas.service.WailThumbService;
 import co.elkware.hetfoijajjatas.util.Utils;
 import com.github.appreciated.material.MaterialTheme;
-import com.sun.corba.se.impl.logging.UtilSystemException;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +25,12 @@ public class WailView extends CustomComponent implements View {
 
     private int currentPage = 0;
 
+    private WailThumbService wailThumbService;
+
     @Autowired
-    public WailView(WailService wailService) {
+    public WailView(WailService wailService, WailThumbService wailThumbService) {
         this.wailService = wailService;
+        this.wailThumbService = wailThumbService;
     }
 
     @PostConstruct
@@ -100,14 +99,14 @@ public class WailView extends CustomComponent implements View {
                 Button thumbsDownBtn = new Button(wail.getThumbsDown().toString(), VaadinIcons.THUMBS_DOWN);
                 thumbsDownBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_DANGER, MaterialTheme.BUTTON_TINY);
 
-                if (Utils.thumbSet().contains(wail.getId())) {
+                if (wailThumbService.hasThumbed(Utils.getBrowserFingerprint(), wail.getId())) {
                     thumbsUpBtn.setEnabled(false);
                     thumbsDownBtn.setEnabled(false);
                 } else {
                     thumbsUpBtn.addClickListener(cl -> {
                         int thumbsUp = wailService.thumbUp(wail.getId());
                         thumbsUpBtn.setCaption(Integer.toString(thumbsUp));
-                        Utils.addThumb(wail.getId());
+                        wailThumbService.addThumb(Utils.getBrowserFingerprint(), wail.getId());
                         thumbsUpBtn.setEnabled(false);
                         thumbsDownBtn.setEnabled(false);
                     });
@@ -115,7 +114,7 @@ public class WailView extends CustomComponent implements View {
                     thumbsDownBtn.addClickListener(cl -> {
                         int thumbsDown = wailService.thumbDown(wail.getId());
                         thumbsDownBtn.setCaption(Integer.toString(thumbsDown));
-                        Utils.addThumb(wail.getId());
+                        wailThumbService.addThumb(Utils.getBrowserFingerprint(), wail.getId());
                         thumbsUpBtn.setEnabled(false);
                         thumbsDownBtn.setEnabled(false);
                     });

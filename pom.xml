@@ -28,10 +28,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -124,9 +125,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <url>jdbc:h2:file:./hetfoijajjgatas</url>
-                    <user>sa</user>
-                    <password></password>
+                    <url>jdbc:postgresql://${env.POSTGRES_HOSTNAME}:${env.POSTGRES_PORT}/hasuradb</url>
+                    <user>${env.POSTGRES_USERNAME}</user>
+                    <password>${env.POSTGRES_PASSWORD}</password>
                     <locations>
                         <location>filesystem:src/main/resources/db/migration</location>
                     </locations>
@@ -144,17 +145,17 @@
                         </goals>
                         <configuration>
                             <jdbc>
-                                <driver>org.h2.Driver</driver>
-                                <url>jdbc:h2:file:./hetfoijajjgatas</url>
-                                <user>sa</user>
-                                <password></password>
+                                <driver>org.postgresql.Driver</driver>
+                                <url>jdbc:postgresql://${env.POSTGRES_HOSTNAME}:${env.POSTGRES_PORT}/hasuradb</url>
+                                <user>${env.POSTGRES_USERNAME}</user>
+                                <password>${env.POSTGRES_PASSWORD}</password>
                             </jdbc>
                             <generator>
                                 <database>
-                                    <name>org.jooq.util.h2.H2Database</name>
+                                    <name>org.jooq.util.postgres.PostgresDatabase</name>
                                     <includes>.*</includes>
                                     <excludes>flyway_schema_history</excludes>
-                                    <inputSchema>PUBLIC</inputSchema>
+                                    <inputSchema>public</inputSchema>
                                 </database>
                                 <target>
                                     <packageName>co.elkware.hetfoijajjatas.db.generated</packageName>

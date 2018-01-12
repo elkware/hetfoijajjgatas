@@ -3,7 +3,6 @@ package co.elkware.hetfoijajjatas.service;
 import co.elkware.hetfoijajjatas.db.generated.tables.WailThumbs;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
-import org.jooq.Record2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

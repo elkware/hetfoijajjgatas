@@ -1,6 +1,5 @@
 package co.elkware.hetfoijajjatas.service;
 
-import co.elkware.hetfoijajjatas.db.generated.tables.User;
 import co.elkware.hetfoijajjatas.db.generated.tables.Wail;
 import co.elkware.hetfoijajjatas.db.generated.tables.records.WailRecord;
 import co.elkware.hetfoijajjatas.util.Utils;
@@ -65,7 +64,7 @@ public class WailService {
     }
 
     public int count() {
-        return dslContext.select(Wail.WAIL.ID).from(Wail.WAIL).execute();
+        return dslContext.selectCount().from(Wail.WAIL).fetchOne(0, int.class);
     }
 
 }

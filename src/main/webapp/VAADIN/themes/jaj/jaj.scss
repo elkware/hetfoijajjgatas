@@ -39,6 +39,10 @@ $mat-background-color: #fafafa; // #fafafa for a light and #303030 for a dark th
 
   // Insert your own theme rules here
 
+  .background-pic {
+    background: url("bannder-jaj-2.png") repeat;
+  }
+
   .dark-background {
     background-color: #24242e;
   }
@@ -76,4 +80,15 @@ $mat-background-color: #fafafa; // #fafafa for a light and #303030 for a dark th
     text-transform: none;
   }
 
+  .v-menubar-menuitem-menuRight {
+    float: right;
+  }
+
+  .v-menubar-menuitem-boldfont {
+    font-weight: bold;
+  }
+
+  .v-button-wrap .v-button-caption {
+    text-transform: none;
+  }
 }

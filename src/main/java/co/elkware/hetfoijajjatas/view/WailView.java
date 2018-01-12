@@ -6,26 +6,26 @@ import co.elkware.hetfoijajjatas.util.Utils;
 import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringView(name = WailView.NAME)
 public class WailView extends CustomComponent implements View {
     public static final String NAME = "";
 
-    private VerticalLayout wailLayout;
-
+    private VerticalLayout wailContentLayout;
     private final WailService wailService;
+    private final WailThumbService wailThumbService;
+    private Button pageCounter;
 
     private int currentPage = 0;
-
-    private WailThumbService wailThumbService;
+    private String pageCountTemplate = "Oldal {0}/{1}";
 
     @Autowired
     public WailView(WailService wailService, WailThumbService wailThumbService) {
@@ -35,19 +35,26 @@ public class WailView extends CustomComponent implements View {
 
     @PostConstruct
     private void init() {
-        wailLayout = new VerticalLayout();
+        VerticalLayout wailLayout = new VerticalLayout();
+        wailContentLayout = new VerticalLayout();
+        pageCounter = new Button();
+        pageCounter.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_FLAT, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_SMALL);
+        pageCounter.setEnabled(false);
+        pageCounter.setCaption(pageCountTemplate.replace("{0}", Integer.toString(currentPage + 1)).replace("{1}", Integer.toString(numberOfPages() + 1)));
+        wailContentLayout.setMargin(false);
 
         Button nextBtn = new Button(VaadinIcons.ARROW_CIRCLE_RIGHT);
-        nextBtn.addStyleNames(MaterialTheme.BUTTON_ROUND);
+        nextBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_SMALL);
         nextBtn.addClickListener(cl -> turnPage(1));
         Button prevBtn = new Button(VaadinIcons.ARROW_CIRCLE_LEFT);
-        prevBtn.addStyleNames(MaterialTheme.BUTTON_ROUND);
+        prevBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_SMALL);
         prevBtn.addClickListener(cl -> turnPage(-1));
 
-        HorizontalLayout btnLayout = new HorizontalLayout(prevBtn, nextBtn);
+        HorizontalLayout btnLayout = new HorizontalLayout(prevBtn, pageCounter, nextBtn);
         btnLayout.setSizeUndefined();
         wailLayout.addComponent(btnLayout);
-        wailLayout.setComponentAlignment(btnLayout, Alignment.MIDDLE_CENTER);
+        wailLayout.addComponent(wailContentLayout);
+        wailLayout.setComponentAlignment(btnLayout, Alignment.MIDDLE_LEFT);
         populatePanel(currentPage * Utils.PAGE_SIZE);
         setCompositionRoot(wailLayout);
     }
@@ -60,14 +67,9 @@ public class WailView extends CustomComponent implements View {
             return;
         }
         currentPage += dir;
-        List<Panel> componentsToRemove = new ArrayList<>();
-        wailLayout.iterator().forEachRemaining(component -> {
-            if (component instanceof Panel) {
-                componentsToRemove.add((Panel) component);
-            }
-        });
-        componentsToRemove.forEach(p -> wailLayout.removeComponent(p));
+        wailContentLayout.removeAllComponents();
         populatePanel(currentPage * Utils.PAGE_SIZE);
+        pageCounter.setCaption(pageCountTemplate.replace("{0}", Integer.toString(currentPage + 1)).replace("{1}", Integer.toString(numberOfPages() + 1)));
     }
 
     private int numberOfPages() {
@@ -132,8 +134,9 @@ public class WailView extends CustomComponent implements View {
 
                 HorizontalLayout commentAndDateLayout = new HorizontalLayout();
                 commentAndDateLayout.setWidth(100, Unit.PERCENTAGE);
-                Link viewCommentsBtn = new Link("Megnezem a hozzaszolasokat!", new ExternalResource("/#!" + SingleWailView.NAME + "/w="+wail.getId()));
-                viewCommentsBtn.addStyleNames(MaterialTheme.LINK_SMALL);
+                Button viewCommentsBtn = new Button("Megnezem a hozzaszolasokat!", cl -> UI.getCurrent().getNavigator().navigateTo(SingleWailView.NAME + "/w="+wail.getId()));
+                viewCommentsBtn.addStyleNames(MaterialTheme.BUTTON_FLAT, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_TINY);
+
                 commentAndDateLayout.addComponents(viewCommentsBtn, date);
                 commentAndDateLayout.setComponentAlignment(viewCommentsBtn, Alignment.MIDDLE_LEFT);
                 commentAndDateLayout.setComponentAlignment(date, Alignment.MIDDLE_RIGHT);
@@ -145,9 +148,13 @@ public class WailView extends CustomComponent implements View {
                     p.addStyleName("alternate-panel-color");
                 }
                 alterBackground[0] = !alterBackground[0];
-                wailLayout.addComponent(p);
+                wailContentLayout.addComponent(p);
             }
         );
     }
 
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+        Page.getCurrent().setTitle("Hétfői jajgatás");
+    }
 }

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,17 +40,9 @@ public class CommentService {
                 .values(content, wailId, user, new Timestamp(new Date().getTime())).execute();
     }
 
-    public Optional<CommentRecord> findOne(Integer id) {
-        return dslContext.select(Comment.COMMENT.ID, Comment.COMMENT.CONTENT, Comment.COMMENT.USER_ID, Comment.COMMENT.WAIL_ID, Comment.COMMENT.CREATED_AT)
-                .from(Comment.COMMENT).where(Comment.COMMENT.ID.equal(id))
-                .stream()
-                .map(r -> new CommentRecord(r.value1(), r.value2(), r.value3(), r.value4(), r.value5()))
-                .findFirst();
-
-    }
 
     public int countByWailId(Integer wailId) {
-        return dslContext.select(Comment.COMMENT.ID).from(Comment.COMMENT).where(Comment.COMMENT.WAIL_ID.equal(wailId)).execute();
+        return dslContext.selectCount().from(Comment.COMMENT).where(Comment.COMMENT.WAIL_ID.equal(wailId)).fetchOne(0, int.class);
     }
 
 }

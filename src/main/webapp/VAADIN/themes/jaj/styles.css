@@ -16724,6 +16724,10 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 	background: #f7f7f7;
 }
 
+.jaj .background-pic {
+	background: url("bannder-jaj-2.png") repeat;
+}
+
 .jaj .dark-background {
 	background-color: #24242e;
 }
@@ -16758,5 +16762,17 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 }
 
 .jaj .reset-txt-transform {
+	text-transform: none;
+}
+
+.jaj .v-menubar-menuitem-menuRight {
+	float: right;
+}
+
+.jaj .v-menubar-menuitem-boldfont {
+	font-weight: bold;
+}
+
+.jaj .v-button-wrap .v-button-caption {
 	text-transform: none;
 }

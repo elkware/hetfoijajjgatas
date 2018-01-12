@@ -11,6 +11,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.*;
@@ -28,6 +29,9 @@ public class SingleWailView extends CustomComponent implements View {
     private HorizontalLayout commentNavigationLayout;
     private FormLayout addNewCommentLayout;
 
+    private Button pageCounter;
+    private String pageCountTemplate = "Oldal {0}/{1}";
+
     @Autowired
     private WailService wailService;
 
@@ -36,9 +40,12 @@ public class SingleWailView extends CustomComponent implements View {
     @Autowired
     private WailThumbService wailThumbService;
 
-    int currentPage = 0;
+    private int currentPage = 0;
 
     public SingleWailView() {
+        pageCounter = new Button();
+        pageCounter.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_FLAT, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_SMALL);
+        pageCounter.setEnabled(false);
         baseLayout = new VerticalLayout();
         commentLayout = new VerticalLayout();
         commentNavigationLayout = new HorizontalLayout();
@@ -50,7 +57,7 @@ public class SingleWailView extends CustomComponent implements View {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         Map<String, String> pm = event.getParameterMap();
         if (pm.get("w") == null) {
-            Notification.show("Hujaja, ne hakkolj!", Notification.Type.ERROR_MESSAGE);
+            Notification.show("Hujaja, ne hekkelj!", Notification.Type.ERROR_MESSAGE);
             UI.getCurrent().getNavigator().navigateTo(WailView.NAME);
             return;
         }
@@ -58,16 +65,17 @@ public class SingleWailView extends CustomComponent implements View {
         try {
             id = Integer.valueOf(pm.get("w"));
         } catch (Exception e) {
-            Notification.show("Hujaja, ne hakkolj!", Notification.Type.ERROR_MESSAGE);
+            Notification.show("Hujaja, ne hekkelj!", Notification.Type.ERROR_MESSAGE);
             UI.getCurrent().getNavigator().navigateTo(WailView.NAME);
             return;
         }
         Optional<WailRecord> wailRecordOpt = wailService.findOne(id);
         if (!wailRecordOpt.isPresent()) {
-            Notification.show("Hujaja, nem talalom a jajjantast", Notification.Type.ERROR_MESSAGE);
+            Notification.show("Hujaja, nem találom a jajjantást", Notification.Type.ERROR_MESSAGE);
             UI.getCurrent().getNavigator().navigateTo(WailView.NAME);
             return;
         }
+        Page.getCurrent().setTitle("Hetfői jajgatás - jajgatás #" + id + " részletei");
         setData(id);
         final WailRecord wail = wailRecordOpt.get();
         VerticalLayout contentLayout = new VerticalLayout();
@@ -88,10 +96,8 @@ public class SingleWailView extends CustomComponent implements View {
 
         Button thumbsUpBtn = new Button(wail.getThumbsUp().toString(), VaadinIcons.THUMBS_UP);
         thumbsUpBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_TINY);
-
         Button thumbsDownBtn = new Button(wail.getThumbsDown().toString(), VaadinIcons.THUMBS_DOWN);
         thumbsDownBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_DANGER, MaterialTheme.BUTTON_TINY);
-
         if (wailThumbService.hasThumbed(Utils.getBrowserFingerprint(), wail.getId())) {
             thumbsUpBtn.setEnabled(false);
             thumbsDownBtn.setEnabled(false);
@@ -130,34 +136,56 @@ public class SingleWailView extends CustomComponent implements View {
 
         baseLayout.addComponent(p);
 
-        // adding comments
-
-        populateComments(id);
-        baseLayout.addComponent(commentLayout);
-
         // add comment navigation
+        pageCounter.setCaption(pageCountTemplate.replace("{0}", Integer.toString(currentPage + 1)).replace("{1}", Integer.toString(numberOfPages((Integer) getData()) + 1)));
         Button nextCommentBtn = new Button(VaadinIcons.ARROW_CIRCLE_RIGHT);
-        nextCommentBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_TINY);
+        nextCommentBtn.addClickListener(cl -> turnPage(1));
+        nextCommentBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_SMALL);
         Button prevCommentBtn = new Button(VaadinIcons.ARROW_CIRCLE_LEFT);
-        prevCommentBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_TINY);
+        prevCommentBtn.addClickListener(cl -> turnPage(-1));
+        prevCommentBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_SMALL);
 
-        commentNavigationLayout.addComponents(prevCommentBtn, nextCommentBtn);
+        commentNavigationLayout.addComponents(prevCommentBtn, pageCounter, nextCommentBtn);
         commentNavigationLayout.setComponentAlignment(prevCommentBtn, Alignment.MIDDLE_RIGHT);
         commentNavigationLayout.setComponentAlignment(nextCommentBtn, Alignment.MIDDLE_LEFT);
         baseLayout.addComponent(commentNavigationLayout);
 
+        // adding comments
+
+        populateComments(id, 0);
+        baseLayout.addComponent(commentLayout);
+
         // new comment form
-        TextField commenterTf = new TextField("Alnevem:");
+        TextField commenterTf = new TextField("Álnevem:");
         commenterTf.setRequiredIndicatorVisible(true);
-        TextArea commentTa = new TextArea("Hozzafuznivalom:");
+        commenterTf.setWidth(100, Unit.PERCENTAGE);
+        TextArea commentTa = new TextArea("Hozzáfűznivalóm:");
         commentTa.setRequiredIndicatorVisible(true);
-        Button sendCommentBtn = new Button("Hozzafuzom");
+        commentTa.setWidth(100, Unit.PERCENTAGE);
+        CheckBox notARobotCb = new CheckBox("Nem vagyok robot!");
+        Button sendCommentBtn = new Button("Hozzáfűzöm");
+        sendCommentBtn.addStyleNames(MaterialTheme.BUTTON_ROUND, MaterialTheme.BUTTON_PRIMARY);
         sendCommentBtn.addClickListener(cl -> {
-            commentService.add(id, commenterTf.getValue(), commentTa.getValue());
-            populateComments(id);
+            if (Boolean.FALSE.equals(notARobotCb.getValue())) {
+                Notification.show("Mégis robot vagy te, nem beszóló!", Notification.Type.ERROR_MESSAGE);
+                notARobotCb.setValue(Boolean.FALSE);
+                return;
+            }
+            if (commenterTf.getValue() == null || "".equals(commenterTf.getValue().trim())) {
+                Notification.show("Álnév nélkül mit ér a kommentár?!", Notification.Type.ERROR_MESSAGE);
+                notARobotCb.setValue(Boolean.FALSE);
+                return;
+            }
+            if (commentTa.getValue() == null || "".equals(commentTa.getValue().trim())) {
+                Notification.show("Nem is akarsz te hozzászólni, nem is írtál kommentárt!", Notification.Type.ERROR_MESSAGE);
+                notARobotCb.setValue(Boolean.FALSE);
+                return;
+            }
+            commentService.add(id, commenterTf.getValue().trim(), commentTa.getValue().trim());
+            populateComments(id, 0);
         });
-        addNewCommentLayout.addComponents(commenterTf, commentTa, sendCommentBtn);
-        baseLayout.addComponent(new Panel(addNewCommentLayout));
+        addNewCommentLayout.addComponents(commenterTf, commentTa, notARobotCb, sendCommentBtn);
+        baseLayout.addComponent(new Panel("Beszólok!", new VerticalLayout(addNewCommentLayout)));
 
     }
 
@@ -165,12 +193,24 @@ public class SingleWailView extends CustomComponent implements View {
         return (commentService.countByWailId(wailId) - 1) / Utils.PAGE_SIZE;
     }
 
-    private void populateComments(Integer id) {
+    private void turnPage(int dir) {
+        if (currentPage == 0 && dir == -1) {
+            return;
+        }
+        if (currentPage == numberOfPages((Integer) getData()) && dir == 1) {
+            return;
+        }
+        currentPage += dir;
+        populateComments((Integer) getData(), currentPage * Utils.PAGE_SIZE);
+        pageCounter.setCaption(pageCountTemplate.replace("{0}", Integer.toString(currentPage + 1)).replace("{1}", Integer.toString(numberOfPages((Integer) getData()) + 1)));
+    }
+
+    private void populateComments(Integer id, Integer offset) {
         commentLayout.removeAllComponents();
-        List<CommentRecord> comments = commentService.listByWailId(id, currentPage);
+        List<CommentRecord> comments = commentService.listByWailId(id, offset);
         if (comments.isEmpty()) {
-            Label l = new Label("Nincs meg kommentar! Legy te az elso aki megmondja a tutit!");
-            l.addStyleNames(MaterialTheme.LABEL_LARGE, MaterialTheme.LABEL_COLORED);
+            Label l = new Label("Nincs még kommentár! Légy te az első aki megmondja a tutit!");
+            l.addStyleNames(MaterialTheme.LABEL_LARGE, MaterialTheme.LABEL_COLORED, MaterialTheme.LABEL_BOLD);
             commentLayout.addComponent(l);
             commentLayout.setComponentAlignment(l, Alignment.MIDDLE_CENTER);
             commentLayout.setWidth(100, Unit.PERCENTAGE);
@@ -178,7 +218,7 @@ public class SingleWailView extends CustomComponent implements View {
             for (CommentRecord comment : comments) {
                 Panel commentPanel = new Panel();
                 commentPanel.addStyleNames(MaterialTheme.PANEL_WELL);
-                Label commenter = new Label("<b><font color=\"red\">" + comment.getUserId() + "</font></b> " +comment.getCreatedAt().toString()+ "-kor a kovetkezo okossaggal allt elo:", ContentMode.HTML);
+                Label commenter = new Label("<b><font color=\"red\">" + comment.getUserId() + "</font></b> " +comment.getCreatedAt().toString()+ "-kor a következő okossággal állt elő:", ContentMode.HTML);
                 commenter.addStyleName(MaterialTheme.LABEL_SMALL);
 
                 Label commentContent = new Label(comment.getContent());

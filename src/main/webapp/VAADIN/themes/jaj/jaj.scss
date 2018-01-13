@@ -66,6 +66,21 @@ $mat-background-color: #fafafa; // #fafafa for a light and #303030 for a dark th
 
   #share-buttons {
     float: right;
+    position: absolute;
+    top: 30px;
+    right: 25px;
+    height: 45px;
+    padding-left: 19px;
+    padding-right: 19px;
+  }
+
+  #share-buttons a {
+    color: white;
+  }
+
+  #share-buttons a:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.25);
   }
 
   #share-buttons img {

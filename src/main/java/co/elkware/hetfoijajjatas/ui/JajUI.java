@@ -7,7 +7,6 @@ import co.elkware.hetfoijajjatas.view.JajViewDisplay;
 import co.elkware.hetfoijajjatas.view.WailView;
 import com.github.appreciated.material.MaterialTheme;
 import com.vaadin.annotations.Theme;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.ContentMode;
@@ -65,14 +64,15 @@ public class JajUI extends UI {
         }).setStyleName("boldfont");
         menuBar.addItem("Jajgatások", (MenuBar.Command) menuItem ->  getNavigator().navigateTo(WailView.NAME));
         menuBar.addItem("Jajjantok én is egyet!", (MenuBar.Command) menuItem -> getNavigator().navigateTo(AddWailView.NAME));
-        MenuBar.MenuItem fbMenuItem = menuBar.addItem("Megosztom a fészen!", VaadinIcons.FACEBOOK_SQUARE, c -> JavaScript.getCurrent().execute("window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(document.URL) + '&t=' + encodeURIComponent(document.title)); return false;"));
+        /*MenuBar.MenuItem fbMenuItem = menuBar.addItem("Megosztom a fészen!", VaadinIcons.FACEBOOK_SQUARE, c -> JavaScript.getCurrent().execute("window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(document.URL) + '&t=' + encodeURIComponent(document.title)); return false;"));
         if (!Page.getCurrent().getWebBrowser().isFirefox()) {
             fbMenuItem.setStyleName("menuRight");
-        }
+        }*/
         menuBar.addStyleName(MaterialTheme.MENUBAR_PRIMARY);
         menuBar.setWidth(100, Unit.PERCENTAGE);
         //Component fbShareBtn = Utils.getFBShareButton();
-        VerticalLayout layout = new VerticalLayout(/*headerLabel,*/ menuBar/*, fbShareBtn*/);
+        VerticalLayout layout = new VerticalLayout(/*headerLabel,*/ menuBar, Utils.getFBShareButton()/*, fbShareBtn*/);
+        layout.setSpacing(false);
         //layout.setComponentAlignment(fbShareBtn, Alignment.MIDDLE_RIGHT);
         layout.setWidth(100, Unit.PERCENTAGE);
         return layout;

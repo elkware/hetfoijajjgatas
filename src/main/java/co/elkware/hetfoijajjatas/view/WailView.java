@@ -134,7 +134,7 @@ public class WailView extends CustomComponent implements View {
 
                 HorizontalLayout commentAndDateLayout = new HorizontalLayout();
                 commentAndDateLayout.setWidth(100, Unit.PERCENTAGE);
-                Button viewCommentsBtn = new Button("Megnezem a hozzaszolasokat!", cl -> UI.getCurrent().getNavigator().navigateTo(SingleWailView.NAME + "/w="+wail.getId()));
+                Button viewCommentsBtn = new Button("Megnézem a hozzászólásokat!", cl -> UI.getCurrent().getNavigator().navigateTo(SingleWailView.NAME + "/w="+wail.getId()));
                 viewCommentsBtn.addStyleNames(MaterialTheme.BUTTON_FLAT, MaterialTheme.BUTTON_FRIENDLY, MaterialTheme.BUTTON_TINY);
 
                 commentAndDateLayout.addComponents(viewCommentsBtn, date);

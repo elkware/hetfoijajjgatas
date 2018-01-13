@@ -1,12 +1,13 @@
 spring:
   datasource:
-    driver-class-name:
-    username: sa
-    password:
-    url: jdbc:h2:file:./hetfoijajjgatas
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://${POSTGRES_HOSTNAME}:${POSTGRES_PORT}/hasuradb
     initialize: false
   jooq:
     sql-dialect: postgres
 vaadin:
   servlet:
     production-mode: true
+    close-idle-sessions: true

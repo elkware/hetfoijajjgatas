@@ -16751,6 +16751,21 @@ body:not(.v-touch) .card-hoverable:hover, body.v-touch .card-hoverable:active {
 
 .jaj #share-buttons {
 	float: right;
+	position: absolute;
+	top: 30px;
+	right: 25px;
+	height: 45px;
+	padding-left: 19px;
+	padding-right: 19px;
+}
+
+.jaj #share-buttons a {
+	color: white;
+}
+
+.jaj #share-buttons a:hover {
+	color: white;
+	background: rgba(255, 255, 255, 0.25);
 }
 
 .jaj #share-buttons img {

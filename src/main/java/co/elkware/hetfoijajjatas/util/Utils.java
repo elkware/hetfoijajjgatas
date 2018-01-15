@@ -8,6 +8,9 @@ import com.vaadin.ui.CustomLayout;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Base64;
 
 public final class Utils {
@@ -50,6 +53,11 @@ public final class Utils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:postgresql://" + System.getenv("POSTGRES_HOSTNAME") +":"+ System.getenv("POSTGRES_PORT")+"/hasuradb",
+                System.getenv("POSTGRES_USERNAME"), System.getenv("POSTGRES_PASSWORD"));
     }
 
 }
